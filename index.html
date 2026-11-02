@@ -1,0 +1,2567 @@
+<!doctype html>
+<html lang="de">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <title>R4GE-Hub</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#2563eb">
+<script>
+  	if ("serviceWorker" in navigator)
+    		navigator.serviceWorker.register("sw.js");
+	</script>
+        <style>
+            :root {
+                --bg: #f1f4f6;
+                --card: #fff;
+                --ink: #17242f;
+                --mute: #6a7885;
+                --line: #dbe2e8;
+                --acc: #0e6b73;
+                --acc2: #e3f1f2;
+                --in: #1f7a46;
+                --out: #b0412c;
+                --warn: #fdeee9;
+                --vac: #e4f2e5;
+            }
+            @media (prefers-color-scheme: dark) {
+                :root {
+                    --bg: #0f161c;
+                    --card: #18222b;
+                    --ink: #e6edf2;
+                    --mute: #8d9ca8;
+                    --line: #2a3743;
+                    --acc: #4cc3cc;
+                    --acc2: #16343a;
+                    --in: #5bd08b;
+                    --out: #ff8f78;
+                    --warn: #3a2019;
+                    --vac: #1b3324;
+                }
+            }
+            * {
+                box-sizing: border-box;
+            }
+            html,
+            body {
+                margin: 0;
+            }
+            body {
+                background: var(--bg);
+                color: var(--ink);
+                font:
+                    16px/1.45 system-ui,
+                    -apple-system,
+                    "Segoe UI",
+                    Roboto,
+                    sans-serif;
+                padding: env(safe-area-inset-top) 0 calc(72px + env(safe-area-inset-bottom));
+            }
+            main {
+                max-width: 980px;
+                margin: 0 auto;
+                padding: 16px;
+            }
+            h1 {
+                font-size: 1.5rem;
+                margin: 4px 0 14px;
+            }
+            .bar {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 14px;
+            }
+            .bar h1 {
+                flex: 1;
+                margin: 0;
+                font-size: 1.25rem;
+            }
+            button,
+            input,
+            select,
+            textarea {
+                font: inherit;
+                color: inherit;
+            }
+            button {
+                background: var(--card);
+                border: 1px solid var(--line);
+                border-radius: 10px;
+                padding: 8px 12px;
+                cursor: pointer;
+            }
+            button.p {
+                background: var(--acc);
+                border-color: var(--acc);
+                color: var(--bg);
+                font-weight: 600;
+            }
+            button.d {
+                color: var(--out);
+            }
+            button:focus-visible,
+            input:focus-visible,
+            select:focus-visible,
+            textarea:focus-visible {
+                outline: 2px solid var(--acc);
+                outline-offset: 2px;
+            }
+            .day {
+                background: var(--card);
+                border: 1px solid var(--line);
+                border-radius: 12px;
+                margin-bottom: 10px;
+                overflow: hidden;
+            }
+            .day.today {
+                border-color: var(--acc);
+                box-shadow: 0 0 0 1px var(--acc);
+            }
+            .dh {
+                display: flex;
+                align-items: center;
+                padding: 8px 12px;
+                background: var(--acc2);
+                font-weight: 600;
+            }
+            .dh span {
+                flex: 1;
+            }
+            .row {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                padding: 10px 12px;
+                border-top: 1px solid var(--line);
+                cursor: pointer;
+            }
+            .row .t {
+                flex: 1;
+                min-width: 0;
+                overflow-wrap: anywhere;
+            }
+            .row small {
+                color: var(--mute);
+            }
+            .row.done .t {
+                text-decoration: line-through;
+                color: var(--mute);
+            }
+            .row.late {
+                background: var(--warn);
+            }
+            .chk {
+                width: 22px;
+                height: 22px;
+                accent-color: var(--acc);
+                flex: none;
+            }
+            .tag {
+                font-size: 0.75rem;
+                border: 1px solid var(--line);
+                border-radius: 6px;
+                padding: 1px 6px;
+                color: var(--mute);
+            }
+            .empty {
+                padding: 10px 12px;
+                color: var(--mute);
+                font-size: 0.9rem;
+            }
+            .sum {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+                margin-bottom: 12px;
+            }
+            .sum div {
+                background: var(--card);
+                border: 1px solid var(--line);
+                border-radius: 12px;
+                padding: 10px;
+            }
+            .sum b {
+                display: block;
+                font-size: 1.1rem;
+            }
+            .in {
+                color: var(--in);
+            }
+            .out {
+                color: var(--out);
+            }
+            .ratio {
+                height: 8px;
+                border-radius: 4px;
+                background: var(--out);
+                overflow: hidden;
+                margin-bottom: 12px;
+            }
+            .ratio i {
+                display: block;
+                height: 100%;
+                background: var(--in);
+            }
+            .list {
+                background: var(--card);
+                border: 1px solid var(--line);
+                border-radius: 12px;
+                overflow: hidden;
+            }
+            .list .row:first-child {
+                border-top: 0;
+            }
+            .note {
+                background: var(--card);
+                border: 1px solid var(--line);
+                border-radius: 12px;
+                padding: 12px;
+                margin-bottom: 10px;
+                cursor: pointer;
+            }
+            .note b {
+                display: block;
+            }
+            .note small {
+                display: block;
+                color: var(--mute);
+            }
+            .note p {
+                margin: 4px 0 0;
+                white-space: pre-wrap;
+                color: var(--mute);
+                overflow-wrap: anywhere;
+            }
+            .banner {
+                background: var(--warn);
+                border: 1px solid var(--out);
+                border-radius: 12px;
+                padding: 10px 12px;
+                margin-bottom: 12px;
+            }
+            nav {
+                position: fixed;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                display: flex;
+                background: var(--card);
+                border-top: 1px solid var(--line);
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+            nav button {
+                flex: 1;
+                border: 0;
+                border-radius: 0;
+                background: none;
+                padding: 12px 2px;
+                font-size: 0.78rem;
+                color: var(--mute);
+            }
+            nav button.on {
+                color: var(--acc);
+                font-weight: 700;
+                box-shadow: inset 0 3px var(--acc);
+            }
+            dialog {
+                border: 1px solid var(--line);
+                border-radius: 14px;
+                background: var(--card);
+                color: var(--ink);
+                width: min(440px, 92vw);
+                padding: 16px;
+            }
+            dialog::backdrop {
+                background: rgba(0, 0, 0, 0.45);
+            }
+            label {
+                display: block;
+                font-size: 0.85rem;
+                color: var(--mute);
+                margin-top: 10px;
+            }
+            input,
+            select,
+            textarea {
+                width: 100%;
+                padding: 9px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: var(--bg);
+                margin-top: 3px;
+            }
+            .acts {
+                display: flex;
+                gap: 8px;
+                margin-top: 16px;
+            }
+            .acts .sp {
+                flex: 1;
+            }
+            .hint {
+                color: var(--mute);
+                font-size: 0.9rem;
+            }
+            .wrap {
+                overflow-x: auto;
+                background: var(--card);
+                border: 1px solid var(--line);
+                border-radius: 12px;
+                margin-bottom: 8px;
+            }
+            .cal {
+                display: grid;
+                grid-template-columns: 42px repeat(7, minmax(88px, 1fr));
+                min-width: 700px;
+            }
+            .ch {
+                padding: 6px 5px;
+                border-left: 1px solid var(--line);
+                border-bottom: 1px solid var(--line);
+                font-size: 0.82rem;
+                min-width: 0;
+            }
+            .chh {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+            .chh button {
+                padding: 0 8px;
+                line-height: 1.6;
+                border-radius: 8px;
+            }
+            .ch small {
+                display: block;
+                color: var(--mute);
+                overflow-wrap: anywhere;
+            }
+            .ch.today {
+                background: var(--acc2);
+            }
+            .ch.hol,
+            .cc.hol {
+                background-color: var(--warn);
+            }
+            .ch.vac,
+            .cc.vac {
+                background-color: var(--vac);
+            }
+            .ch.hol small {
+                color: var(--out);
+            }
+            .chip {
+                margin-top: 3px;
+                padding: 2px 5px;
+                border-radius: 5px;
+                background: var(--acc);
+                color: var(--bg);
+                font-size: 0.75rem;
+                cursor: pointer;
+                overflow-wrap: anywhere;
+            }
+            .ax {
+                position: relative;
+                height: 704px;
+            }
+            .ax span {
+                position: absolute;
+                right: 4px;
+                transform: translateY(-50%);
+                font-size: 0.7rem;
+                color: var(--mute);
+            }
+            .ax span:first-child {
+                transform: none;
+            }
+            .cc {
+                position: relative;
+                height: 704px;
+                border-left: 1px solid var(--line);
+                background-image: repeating-linear-gradient(to bottom, transparent 0 43px, var(--line) 43px 44px);
+            }
+            .shift {
+                position: absolute;
+                left: 3px;
+                right: 3px;
+                border: 1px solid var(--acc);
+                background: var(--acc2);
+                border-radius: 6px;
+                overflow: hidden;
+            }
+            .brk {
+                position: absolute;
+                left: 0;
+                right: 0;
+                background: repeating-linear-gradient(135deg, var(--card) 0 3px, transparent 3px 6px);
+                border-block: 1px solid var(--acc);
+            }
+            .ev {
+                position: absolute;
+                left: 9px;
+                right: 2px;
+                border-radius: 6px;
+                padding: 2px 5px;
+                font-size: 0.76rem;
+                line-height: 1.25;
+                overflow: hidden;
+                cursor: pointer;
+                z-index: 2;
+            }
+            .ev.tm {
+                background: var(--acc);
+                color: var(--bg);
+            }
+            .ev.tk {
+                background: var(--card);
+                border: 1px dashed var(--acc);
+                color: var(--ink);
+            }
+            .done {
+                opacity: 0.55;
+                text-decoration: line-through;
+            }
+            .sub {
+                font-size: 1.05rem;
+                margin: 18px 0 6px;
+            }
+            label.opt {
+                display: flex;
+                margin: 0;
+                font-size: 1rem;
+                color: var(--ink);
+            }
+            .qa {
+                display: flex;
+                gap: 6px;
+                flex-wrap: wrap;
+                margin-bottom: 10px;
+            }
+            .qa input {
+                margin-top: 0;
+                width: auto;
+                flex: 0 0 auto;
+            }
+            .qa input[name="title"] {
+                flex: 1 1 180px;
+                min-width: 0;
+            }
+            .sum {
+                grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            }
+            .sum small {
+                display: block;
+                color: var(--mute);
+                font-size: 0.75rem;
+                overflow-wrap: anywhere;
+            }
+            .seg {
+                display: flex;
+                margin-bottom: 12px;
+            }
+            .seg button {
+                flex: 1;
+                border-radius: 0;
+            }
+            .seg button:first-child {
+                border-radius: 10px 0 0 10px;
+            }
+            .seg button:last-child {
+                border-radius: 0 10px 10px 0;
+            }
+            .seg button.on {
+                background: var(--acc);
+                border-color: var(--acc);
+                color: var(--bg);
+                font-weight: 600;
+            }
+            .cg {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 12px;
+                margin-bottom: 12px;
+            }
+            .cd {
+                background: var(--card);
+                border: 1px solid var(--line);
+                border-radius: 12px;
+                padding: 10px 12px;
+                min-width: 0;
+            }
+            .cd h3 {
+                margin: 0 0 8px;
+                font-size: 0.95rem;
+            }
+            .svg {
+                width: 100%;
+                height: auto;
+                display: block;
+            }
+            .bi {
+                fill: var(--in);
+            }
+            .bo {
+                fill: var(--out);
+            }
+            .tx {
+                fill: var(--mute);
+                font-size: 11px;
+            }
+            .ln {
+                stroke: var(--line);
+                stroke-width: 1;
+            }
+            .pl {
+                fill: none;
+                stroke: var(--acc);
+                stroke-width: 2.5;
+                stroke-linejoin: round;
+            }
+            .dn {
+                display: flex;
+                gap: 12px;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+            .ring {
+                width: 150px;
+                flex: none;
+                color: var(--ink);
+            }
+            .leg {
+                flex: 1;
+                min-width: 190px;
+            }
+            .lg {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                padding: 4px 6px;
+                border-radius: 8px;
+                font-size: 0.88rem;
+            }
+            .lg[data-a] {
+                cursor: pointer;
+            }
+            .lg.on {
+                background: var(--acc2);
+            }
+            .lg i {
+                width: 10px;
+                height: 10px;
+                border-radius: 3px;
+                flex: none;
+            }
+            .lg span {
+                flex: 1;
+                min-width: 0;
+                overflow-wrap: anywhere;
+            }
+            .lg small {
+                color: var(--mute);
+                width: 2.8em;
+                text-align: right;
+            }
+            .hb {
+                display: grid;
+                grid-template-columns: 1fr auto;
+                gap: 2px 8px;
+                margin-bottom: 8px;
+                font-size: 0.88rem;
+            }
+            .hb span {
+                overflow-wrap: anywhere;
+            }
+            .hb u {
+                grid-column: 1/3;
+                display: block;
+                height: 6px;
+                border-radius: 3px;
+                background: var(--line);
+                text-decoration: none;
+            }
+            .hb u i {
+                display: block;
+                height: 100%;
+                border-radius: 3px;
+                background: var(--out);
+            }
+            .tpls {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+                margin-bottom: 12px;
+            }
+            .tpls button {
+                border-radius: 999px;
+                padding: 6px 12px;
+            }
+            .tpls .tpl {
+                background: var(--acc2);
+                border-color: var(--acc);
+            }
+            .tpls .tpl small {
+                color: var(--mute);
+            }
+            .tpls.ed .tpl {
+                border-style: dashed;
+            }
+            .chip.fx {
+                background: var(--card);
+                color: var(--ink);
+                border: 1px solid var(--acc);
+            }
+            .panel.hh .bar > h1 {
+                display: none;
+            }
+            .panel.hh .bar {
+                justify-content: flex-end;
+                margin-bottom: 8px;
+            }
+            .segw {
+                margin-top: 16px;
+            }
+            .segw button {
+                font-size: 0.8rem;
+                padding: 8px 4px;
+                white-space: normal;
+            }
+            details.cd summary {
+                cursor: pointer;
+            }
+            .fs {
+                display: flex;
+                gap: 8px;
+                align-items: flex-end;
+                margin-bottom: 12px;
+            }
+            .fs label {
+                flex: 1;
+                margin: 0;
+                min-width: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <main id="main"></main>
+        <nav id="nav"></nav>
+        <dialog id="dlg"><form id="frm"></form></dialog>
+        <input type="file" id="imp" accept="application/json" hidden />
+        <input type="file" id="csv" accept=".csv,.txt,text/csv" hidden />
+        <script>
+            const KEY = "mein-alltag-v1";
+            let S = {
+                week: [],
+                fin: [],
+                todos: [],
+                notes: [],
+                rem: [],
+                vac: [],
+                fix: [],
+                imports: [],
+                cfg: { hol: [] },
+            };
+            try {
+                const r = localStorage.getItem(KEY);
+                if (r) Object.assign(S, JSON.parse(r));
+            } catch (e) {}
+            const save = () => {
+                try {
+                    localStorage.setItem(KEY, JSON.stringify(S));
+                } catch (e) {}
+            };
+            // Vorlagen für den Kalender (frei änderbar in der App)
+            const DEF_TPL = [
+                ["Fahrstunde", "Termin"],
+                ["Klausur", "Termin"],
+                ["Fitnessstudio", "Termin"],
+                ["Arzttermin", "Termin"],
+                ["Lernen", "Aufgabe"],
+                ["Einkaufen", "Aufgabe"],
+            ];
+            const norm = () => {
+                if (!Array.isArray(S.tpl))
+                    S.tpl = DEF_TPL.map((t) => ({
+                        id: Math.random().toString(36).slice(2, 8),
+                        title: t[0],
+                        type: t[1],
+                        time: "",
+                        end: "",
+                    }));
+            };
+            norm();
+
+            // Module: hier lassen sich weitere Felder oder Module ergänzen
+            const D = {
+                week: {
+                    f: [
+                        ["date", "Datum", "date"],
+                        ["time", "Beginn (optional)", "time"],
+                        ["end", "Ende (optional)", "time"],
+                        ["title", "Titel", "text"],
+                        ["type", "Art", "select", ["Termin", "Aufgabe"]],
+                        ["state", "Status", "select", ["Offen", "Erledigt"]],
+                        ["memo", "Notiz", "textarea"],
+                        ["rdate", "Erinnerung am (optional)", "date"],
+                        ["rtime", "Uhrzeit der Erinnerung", "time"],
+                    ],
+                },
+                fix: {
+                    f: [
+                        ["title", "Name", "text"],
+                        ["kind", "Art", "select", ["Geburtstag", "Zahltag", "Sonstiges"]],
+                        [
+                            "rule",
+                            "Wiederholung",
+                            "select",
+                            ["Jährlich", "Monatlich", "Letzter Werktag im Monat", "Wöchentlich"],
+                        ],
+                        ["date", "Datum (Geburtsdatum bzw. Starttag)", "date"],
+                        ["memo", "Notiz", "textarea"],
+                    ],
+                },
+                vac: {
+                    f: [
+                        ["date", "Von", "date"],
+                        ["to", "Bis", "date"],
+                        ["title", "Bezeichnung", "text"],
+                        ["memo", "Notiz", "textarea"],
+                        ["rdate", "Erinnerung am (optional)", "date"],
+                        ["rtime", "Uhrzeit der Erinnerung", "time"],
+                    ],
+                },
+                tpl: {
+                    f: [
+                        ["title", "Name der Vorlage", "text"],
+                        ["type", "Art", "select", ["Termin", "Aufgabe"]],
+                        ["time", "Standard-Beginn (optional)", "time"],
+                        ["end", "Standard-Ende (optional)", "time"],
+                    ],
+                },
+                fin: {
+                    f: [
+                        ["date", "Datum", "date"],
+                        ["title", "Bezeichnung", "text"],
+                        ["cat", "Kategorie", "text"],
+                        ["amount", "Betrag in €", "number"],
+                        ["kind", "Art", "select", ["Ausgabe", "Einnahme"]],
+                        ["note", "Verwendungszweck", "text"],
+                        ["memo", "Notiz", "textarea"],
+                        ["rdate", "Erinnerung am (optional)", "date"],
+                        ["rtime", "Uhrzeit der Erinnerung", "time"],
+                    ],
+                },
+                todos: {
+                    f: [
+                        ["title", "Aufgabe", "text"],
+                        ["memo", "Notiz", "textarea"],
+                        ["rdate", "Erinnerung am (optional)", "date"],
+                        ["rtime", "Uhrzeit der Erinnerung", "time"],
+                    ],
+                },
+                notes: {
+                    f: [
+                        ["title", "Titel", "text"],
+                        ["text", "Notiz", "textarea"],
+                    ],
+                },
+                rem: {
+                    f: [
+                        ["date", "Datum", "date"],
+                        ["time", "Uhrzeit", "time"],
+                        ["title", "Erinnerung", "text"],
+                        ["memo", "Notiz", "textarea"],
+                    ],
+                },
+            };
+            const TABS = [
+                ["week", "Woche"],
+                ["fin", "Finanzen"],
+                ["data", "Daten"],
+            ];
+            let tab = "week",
+                wk = 0,
+                mo = 0;
+
+            const esc = (s) =>
+                String(s ?? "").replace(
+                    /[&<>"]/g,
+                    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]
+                );
+            const iso = (d) =>
+                d.getFullYear() +
+                "-" +
+                String(d.getMonth() + 1).padStart(2, "0") +
+                "-" +
+                String(d.getDate()).padStart(2, "0");
+            const addDays = (d, n) => {
+                const x = new Date(d);
+                x.setDate(x.getDate() + n);
+                return x;
+            };
+            const monday = (d) => {
+                const x = new Date(d);
+                x.setHours(0, 0, 0, 0);
+                x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
+                return x;
+            };
+            const eur = (n) => Number(n || 0).toLocaleString("de-DE", { style: "currency", currency: "EUR" });
+            const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+            const dnice = (ds) =>
+                new Date(ds + "T00:00").toLocaleDateString("de-DE", {
+                    weekday: "short",
+                    day: "numeric",
+                    month: "short",
+                });
+            const cmp = (a, b) => ((a.date || "") + (a.time || "")).localeCompare((b.date || "") + (b.time || ""));
+
+            function form(mod, id, pre) {
+                const cur = id ? S[mod].find((e) => e.id === id) : Object.assign({}, pre);
+                const fr = document.getElementById("frm");
+                fr.innerHTML =
+                    D[mod].f
+                        .map(([k, l, t, o]) => {
+                            const v = esc(cur[k] ?? (k === "date" && !id ? iso(new Date()) : ""));
+                            const inp =
+                                t === "select"
+                                    ? '<select name="' +
+                                      k +
+                                      '">' +
+                                      o
+                                          .map((x) => {
+                                              const v = Array.isArray(x) ? x[0] : x,
+                                                  l = Array.isArray(x) ? x[1] : x;
+                                              return (
+                                                  '<option value="' +
+                                                  esc(v) +
+                                                  '"' +
+                                                  (cur[k] === v ? " selected" : "") +
+                                                  ">" +
+                                                  esc(l) +
+                                                  "</option>"
+                                              );
+                                          })
+                                          .join("") +
+                                      "</select>"
+                                    : t === "textarea"
+                                      ? '<textarea name="' +
+                                        k +
+                                        '" rows="' +
+                                        (k === "memo" ? 3 : 6) +
+                                        '">' +
+                                        v +
+                                        "</textarea>"
+                                      : '<input name="' +
+                                        k +
+                                        '" type="' +
+                                        t +
+                                        '" value="' +
+                                        v +
+                                        '"' +
+                                        (t === "number" ? ' step="0.01" inputmode="decimal"' : "") +
+                                        (k === "title" ? " required" : "") +
+                                        ">";
+                            return "<label>" + l + inp + "</label>";
+                        })
+                        .join("") +
+                    '<div class="acts">' +
+                    (id ? '<button type="button" class="d" id="del">Löschen</button>' : "") +
+                    '<span class="sp"></span><button type="button" id="cx">Abbrechen</button><button class="p">Speichern</button></div>';
+                const dlg = document.getElementById("dlg");
+                fr.onsubmit = (e) => {
+                    e.preventDefault();
+                    const fd = Object.fromEntries(new FormData(fr));
+                    if (mod === "rref") {
+                        const q = (fd.ref || "").split(":"),
+                            it = q[0] && S[q[0]] ? S[q[0]].find((x) => x.id === q[1]) : null;
+                        if (it && fd.rdate) {
+                            it.rdate = fd.rdate;
+                            it.rtime = fd.rtime || "";
+                            it.rdone = false;
+                            save();
+                        }
+                        dlg.close();
+                        render();
+                        return;
+                    }
+                    if (mod === "nref") {
+                        const q = (fd.ref || "").split(":"),
+                            it = q[0] && S[q[0]] ? S[q[0]].find((x) => x.id === q[1]) : null,
+                            txt = (fd.memo || "").trim();
+                        if (it && txt) {
+                            it.memo = it.memo ? it.memo + "\n" + txt : txt;
+                            save();
+                        }
+                        dlg.close();
+                        render();
+                        return;
+                    }
+                    if (fd.amount !== undefined) fd.amount = parseFloat(String(fd.amount).replace(",", ".")) || 0;
+                    if (fd.to !== undefined && fd.date && fd.to < fd.date) fd.to = fd.date;
+                    if (fd.state !== undefined) fd.done = false;
+                    if (fd.rdate !== undefined) {
+                        if (!fd.rdate) fd.rtime = "";
+                        if (id && (cur.rdate !== fd.rdate || (cur.rtime || "") !== fd.rtime)) fd.rdone = false;
+                    }
+                    if (mod === "week" && tab === "week" && fd.date)
+                        wk = Math.round((monday(new Date(fd.date + "T00:00")) - monday(new Date())) / 6048e5);
+                    if (id) Object.assign(cur, fd);
+                    else S[mod].push(Object.assign({ id: uid(), done: false }, fd));
+                    save();
+                    dlg.close();
+                    render();
+                };
+                document.getElementById("cx").onclick = () => dlg.close();
+                const del = document.getElementById("del");
+                if (del)
+                    del.onclick = () => {
+                        if (!del.dataset.arm) {
+                            del.dataset.arm = "1";
+                            del.textContent = "Wirklich löschen?";
+                            del.classList.add("p");
+                            return;
+                        }
+                        S[mod] = S[mod].filter((e) => e.id !== id);
+                        save();
+                        dlg.close();
+                        render();
+                    };
+                dlg.showModal();
+            }
+
+            const addBtn = (m, d) =>
+                '<button class="p" data-a="add" data-m="' +
+                m +
+                '"' +
+                (d ? ' data-d="' + d + '"' : "") +
+                ">+ Neu</button>";
+            const nav3 = (k) =>
+                '<button data-a="nav" data-k="' +
+                k +
+                '" data-n="-1" aria-label="Zurück">‹</button><button data-a="nav" data-k="' +
+                k +
+                '" data-n="0">Heute</button><button data-a="nav" data-k="' +
+                k +
+                '" data-n="1" aria-label="Weiter">›</button>';
+
+            const H = 44,
+                T0 = 6,
+                T1 = 22;
+            const mins = (t) => {
+                const p = t.split(":");
+                return +p[0] * 60 + +p[1];
+            };
+            const tp = (t) => ((mins(t) - T0 * 60) / 60) * H;
+            const hm = (m) => Math.floor(m / 60) + ":" + String(Math.round(m % 60)).padStart(2, "0");
+            const isDone = (e) => e.done || e.state === "Erledigt";
+            const B = (a, b) => [a, b];
+            // Arbeitsplan: Wochentag (1 = Montag) → [Beginn, Ende, Pausen]
+            const WORK = {
+                1: ["08:00", "17:00", [B("12:00", "12:30")]],
+                2: ["07:30", "13:45", [B("09:00", "09:20"), B("10:50", "11:10"), B("12:40", "13:00")]],
+                3: ["07:30", "17:00", [B("09:00", "09:20"), B("10:50", "11:10"), B("12:00", "12:30")]],
+                4: ["08:00", "17:00", [B("12:00", "12:30")]],
+                5: ["08:00", "15:30", [B("12:00", "12:30")]],
+            };
+            const OPT = [
+                ["dk", "Heilige Drei Könige (6. Jan.)"],
+                ["fr", "Internationaler Frauentag (8. März)"],
+                ["fl", "Fronleichnam"],
+                ["mh", "Mariä Himmelfahrt (15. Aug.)"],
+                ["kt", "Weltkindertag (20. Sep.)"],
+                ["rf", "Reformationstag (31. Okt.)"],
+                ["ah", "Allerheiligen (1. Nov.)"],
+                ["bb", "Buß- und Bettag"],
+            ];
+            function easter(y) {
+                const a = y % 19,
+                    b = Math.floor(y / 100),
+                    c = y % 100,
+                    d = Math.floor(b / 4),
+                    e = b % 4,
+                    f = Math.floor((b + 8) / 25),
+                    g = Math.floor((b - f + 1) / 3);
+                const h = (19 * a + b - d - g + 15) % 30,
+                    i = Math.floor(c / 4),
+                    k = c % 4,
+                    l = (32 + 2 * e + 2 * i - h - k) % 7,
+                    m = Math.floor((a + 11 * h + 22 * l) / 451);
+                const n = h + l - 7 * m + 114;
+                return new Date(y, Math.floor(n / 31) - 1, (n % 31) + 1);
+            }
+            const HC = {};
+            function getHol(y) {
+                const on = S.cfg.hol,
+                    key = on.join() + "|" + y;
+                if (HC[key]) return HC[key];
+                const e = easter(y),
+                    r = {},
+                    put = (d, n) => {
+                        r[iso(d)] = n;
+                    },
+                    rel = (n) => addDays(e, n);
+                put(new Date(y, 0, 1), "Neujahr");
+                put(rel(-2), "Karfreitag");
+                put(rel(1), "Ostermontag");
+                put(new Date(y, 4, 1), "Tag der Arbeit");
+                put(rel(39), "Christi Himmelfahrt");
+                put(rel(50), "Pfingstmontag");
+                put(new Date(y, 9, 3), "Tag der Deutschen Einheit");
+                put(new Date(y, 11, 25), "1. Weihnachtstag");
+                put(new Date(y, 11, 26), "2. Weihnachtstag");
+                if (on.includes("dk")) put(new Date(y, 0, 6), "Heilige Drei Könige");
+                if (on.includes("fr")) put(new Date(y, 2, 8), "Frauentag");
+                if (on.includes("fl")) put(rel(60), "Fronleichnam");
+                if (on.includes("mh")) put(new Date(y, 7, 15), "Mariä Himmelfahrt");
+                if (on.includes("kt")) put(new Date(y, 8, 20), "Weltkindertag");
+                if (on.includes("rf")) put(new Date(y, 9, 31), "Reformationstag");
+                if (on.includes("ah")) put(new Date(y, 10, 1), "Allerheiligen");
+                if (on.includes("bb")) {
+                    const d = new Date(y, 10, 22);
+                    while (d.getDay() !== 3) d.setDate(d.getDate() - 1);
+                    put(d, "Buß- und Bettag");
+                }
+                return (HC[key] = r);
+            }
+            let fper = "m",
+                fcat = "",
+                fmsg = "",
+                flim = 60,
+                fsrc = "",
+                delArm = false;
+            const PAL = ["#0e8a96", "#d9822b", "#7a5cc2", "#3f9f5f", "#c44a64", "#4a78c9", "#b5a22a", "#8a96a3"];
+            const signed = (e) => (e.kind === "Einnahme" ? e.amount : -e.amount);
+            const fd = (ds) => new Date(ds + "T00:00").toLocaleDateString("de-DE");
+            const mname = (k) => new Date(k + "-01T00:00").toLocaleDateString("de-DE", { month: "short" });
+            function monthKeys(from, to) {
+                const r = [];
+                let [y, m] = from.split("-").map(Number);
+                const [y2, m2] = to.split("-").map(Number);
+                while (y < y2 || (y === y2 && m <= m2)) {
+                    r.push(y + "-" + String(m).padStart(2, "0"));
+                    if (++m > 12) {
+                        m = 1;
+                        y++;
+                    }
+                }
+                return r;
+            }
+            // Kategorien für den automatischen Import: [Name, Suchmuster]
+            const CATS = [
+                ["Lebensmittel", /rewe|edeka|aldi|lidl|penny|netto|kaufland|norma|nahkauf|tegut|globus|denn.?s/i],
+                ["Drogerie & Gesundheit", /\bdm\b|dm-drogerie|rossmann|apotheke|müller|mueller|arzt|zahnarzt/i],
+                [
+                    "Restaurant & Lieferdienst",
+                    /lieferando|wolt|restaurant|mcdonald|burger king|subway|café|cafe|bäckerei|baeckerei|starbucks|pizz|imbiss|döner|doner/i,
+                ],
+                [
+                    "Mobilität",
+                    /\bdb\b|bahn|tankstelle|shell|aral|esso|\bjet\b|uber|bolt|bvg|mvg|vbb|flixbus|parkschein|parken|ticket/i,
+                ],
+                [
+                    "Wohnen",
+                    /miete|vermiet|hausverwalt|strom|stadtwerk|vattenfall|e\.?on|enbw|wasser|nebenkost|beitragsservice|rundfunk/i,
+                ],
+                ["Versicherung", /versicherung|allianz|\bhuk|\baxa\b|ergo|debeka|barmer|techniker|\baok\b/i],
+                ["Telefon & Internet", /telekom|vodafone|\bo2\b|1&1|congstar|telefonica|freenet/i],
+                ["Abos & Medien", /netflix|spotify|disney|prime video|dazn|youtube|apple\.com|google|icloud|audible/i],
+                ["Shopping", /amazon|paypal|zalando|ebay|\botto\b|ikea|saturn|mediamarkt|h&m|decathlon|temu|shein/i],
+                ["Bargeld", /geldautomat|bargeld|auszahlung|\batm\b/i],
+                ["Freizeit", /kino|theater|fitness|mcfit|urban sports|museum|konzert|freizeit/i],
+                ["Steuern & Gebühren", /finanzamt|steuer|gebühr|gebuehr|entgelt|kontoführung|kontofuehrung/i],
+            ];
+            const catOf = (txt, inc) =>
+                inc
+                    ? /gehalt|lohn|bezüge|bezuege|besoldung|arbeitgeber/i.test(txt)
+                        ? "Gehalt"
+                        : "Sonstige Einnahmen"
+                    : (CATS.find((c) => c[1].test(txt)) || [])[0] || "Sonstiges";
+
+            function parseCsv(t, sep) {
+                const rows = [];
+                let r = [],
+                    f = "",
+                    q = false;
+                for (let i = 0; i < t.length; i++) {
+                    const c = t[i];
+                    if (q) {
+                        if (c === '"') {
+                            if (t[i + 1] === '"') {
+                                f += '"';
+                                i++;
+                            } else q = false;
+                        } else f += c;
+                    } else if (c === '"') q = true;
+                    else if (c === sep) {
+                        r.push(f);
+                        f = "";
+                    } else if (c === "\n" || c === "\r") {
+                        if (c === "\r" && t[i + 1] === "\n") i++;
+                        r.push(f);
+                        f = "";
+                        if (r.some((x) => x !== "")) rows.push(r);
+                        r = [];
+                    } else f += c;
+                }
+                if (f !== "" || r.length) {
+                    r.push(f);
+                    if (r.some((x) => x !== "")) rows.push(r);
+                }
+                return rows;
+            }
+            function importCamt(txt, name) {
+                txt = txt.replace(/^\uFEFF/, "");
+                const first = txt.split(/\r?\n/)[0] || "";
+                const rows = parseCsv(txt, first.split(";").length >= first.split(",").length ? ";" : ",");
+                if (rows.length < 2) return "Die Datei enthält keine Umsätze.";
+                const hd = rows[0].map((h) => h.trim().toLowerCase());
+                const ix = (...n) => hd.findIndex((h) => n.some((x) => h === x || h.startsWith(x)));
+                const c = {
+                    d: ix("buchungstag"),
+                    a: ix("betrag"),
+                    z: ix("verwendungszweck"),
+                    t: ix("buchungstext"),
+                    p: ix("beguenstigter", "begünstigter"),
+                };
+                if (c.d < 0 || c.a < 0)
+                    return "Das Format wurde nicht erkannt. Erwartet wird der Export „CSV-CAMT-Format“ (V8) mit den Spalten Buchungstag und Betrag.";
+                const seen = new Set(S.fin.map((e) => e.key).filter(Boolean)),
+                    cnt = {},
+                    impId = uid(),
+                    byKey = new Map(S.fin.filter((e) => e.key).map((e) => [e.key, e]));
+                let add = 0,
+                    dup = 0,
+                    skip = 0;
+                rows.slice(1).forEach((r) => {
+                    const m = (r[c.d] || "").trim().match(/^(\d{1,2})\.(\d{1,2})\.(\d{2,4})$/);
+                    const amt = parseFloat((r[c.a] || "").replace(/\./g, "").replace(",", "."));
+                    if (!m || isNaN(amt)) {
+                        skip++;
+                        return;
+                    }
+                    const y = +m[3] < 100 ? 2000 + +m[3] : +m[3];
+                    const date = y + "-" + m[2].padStart(2, "0") + "-" + m[1].padStart(2, "0");
+                    const g = (i) => (i >= 0 ? (r[i] || "").replace(/\s+/g, " ").trim() : "");
+                    const payee = g(c.p),
+                        note = g(c.z),
+                        text = g(c.t);
+                    const base = [date, amt.toFixed(2), payee, note].join("|");
+                    const key = base + "#" + (cnt[base] = (cnt[base] || 0) + 1);
+                    if (seen.has(key)) {
+                        dup++;
+                        const ex = byKey.get(key);
+                        if (ex) {
+                            ex.imps = ex.imps || [];
+                            if (!ex.imps.includes(impId)) ex.imps.push(impId);
+                        }
+                        return;
+                    }
+                    seen.add(key);
+                    S.fin.push({
+                        id: uid(),
+                        date,
+                        title: payee || text || "Umsatz",
+                        cat: catOf(payee + " " + note + " " + text, amt > 0),
+                        amount: Math.abs(amt),
+                        kind: amt > 0 ? "Einnahme" : "Ausgabe",
+                        note: note.slice(0, 160),
+                        key,
+                        src: "csv",
+                        imps: [impId],
+                    });
+                    add++;
+                });
+                if (add + dup > 0) {
+                    (S.imports = S.imports || []).push({
+                        id: impId,
+                        name: name || "Import",
+                        at: new Date().toISOString(),
+                        n: add + dup,
+                        add,
+                        dup,
+                    });
+                    fsrc = impId;
+                    delArm = false;
+                }
+                save();
+                fper = "all";
+                mo = 0;
+                fcat = "";
+                flim = 60;
+                return (
+                    add +
+                    " Umsätze importiert" +
+                    (dup ? ", " + dup + " bereits vorhanden" : "") +
+                    (skip ? ", " + skip + " Zeilen übersprungen" : "") +
+                    ". Angezeigt wird jetzt nur dieser Import (Auswahl unter „Umsatzquelle“)."
+                );
+            }
+
+            function bars(ms) {
+                const W = 600,
+                    Ht = 190,
+                    pb = 22,
+                    n = ms.length,
+                    sl = W / n,
+                    bw = Math.max(3, Math.min(18, sl / 2.8));
+                const mx = Math.max(1, ...ms.flatMap((m) => [m.inc, m.out])),
+                    hh = (v) => (v / mx) * (Ht - pb - 8);
+                return (
+                    '<svg viewBox="0 0 ' +
+                    W +
+                    " " +
+                    Ht +
+                    '" class="svg" role="img" aria-label="Einnahmen und Ausgaben pro Monat">' +
+                    ms
+                        .map((m, i) => {
+                            const x = i * sl + sl / 2;
+                            return (
+                                '<rect class="bi" x="' +
+                                (x - bw - 1) +
+                                '" y="' +
+                                (Ht - pb - hh(m.inc)) +
+                                '" width="' +
+                                bw +
+                                '" height="' +
+                                hh(m.inc) +
+                                '" rx="2"><title>' +
+                                m.k +
+                                " Einnahmen " +
+                                eur(m.inc) +
+                                "</title></rect>" +
+                                '<rect class="bo" x="' +
+                                (x + 1) +
+                                '" y="' +
+                                (Ht - pb - hh(m.out)) +
+                                '" width="' +
+                                bw +
+                                '" height="' +
+                                hh(m.out) +
+                                '" rx="2"><title>' +
+                                m.k +
+                                " Ausgaben " +
+                                eur(m.out) +
+                                "</title></rect>" +
+                                (n <= 12 || i % 2 === 0
+                                    ? '<text class="tx" x="' +
+                                      x +
+                                      '" y="' +
+                                      (Ht - 6) +
+                                      '" text-anchor="middle">' +
+                                      mname(m.k) +
+                                      "</text>"
+                                    : "")
+                            );
+                        })
+                        .join("") +
+                    '<line class="ln" x1="0" x2="' +
+                    W +
+                    '" y1="' +
+                    (Ht - pb) +
+                    '" y2="' +
+                    (Ht - pb) +
+                    '"/></svg>'
+                );
+            }
+            function donut(cs, total) {
+                const top = cs.slice(0, 7),
+                    rest = cs.slice(7).reduce((s, x) => s + x[1], 0);
+                if (rest) top.push(["Weitere", rest]);
+                const C = 2 * Math.PI * 40;
+                let acc = 0;
+                const arcs = top
+                    .map((x, i) => {
+                        const l = (x[1] / total) * C,
+                            s =
+                                '<circle cx="60" cy="60" r="40" fill="none" stroke="' +
+                                PAL[i] +
+                                '" stroke-width="22" stroke-dasharray="' +
+                                l +
+                                " " +
+                                (C - l) +
+                                '" stroke-dashoffset="' +
+                                -acc +
+                                '" transform="rotate(-90 60 60)"><title>' +
+                                esc(x[0]) +
+                                ": " +
+                                eur(x[1]) +
+                                "</title></circle>";
+                        acc += l;
+                        return s;
+                    })
+                    .join("");
+                const leg = top
+                    .map(
+                        (x, i) =>
+                            '<div class="lg' +
+                            (fcat === x[0] ? " on" : "") +
+                            '"' +
+                            (x[0] !== "Weitere" ? ' data-a="fcat" data-k="' + esc(x[0]) + '"' : "") +
+                            '><i style="background:' +
+                            PAL[i] +
+                            '"></i><span>' +
+                            esc(x[0]) +
+                            "</span><b>" +
+                            eur(x[1]) +
+                            "</b><small>" +
+                            Math.round((x[1] / total) * 100) +
+                            " %</small></div>"
+                    )
+                    .join("");
+                return (
+                    '<div class="dn"><svg viewBox="0 0 120 120" class="ring" role="img" aria-label="Ausgaben nach Kategorie">' +
+                    arcs +
+                    '<text class="tx" x="60" y="57" text-anchor="middle">Ausgaben</text><text x="60" y="71" text-anchor="middle" style="font-size:9px;font-weight:700;fill:currentColor">' +
+                    eur(total) +
+                    '</text></svg><div class="leg">' +
+                    leg +
+                    "</div></div>"
+                );
+            }
+            function line(items) {
+                const a = items.slice().reverse();
+                if (a.length < 2) return '<div class="empty">Zu wenige Buchungen.</div>';
+                let c = 0;
+                const pts = a.map((e) => [e.date, (c += signed(e))]),
+                    vs = pts.map((p) => p[1]);
+                const t0 = new Date(pts[0][0]).getTime(),
+                    t1 = new Date(pts[pts.length - 1][0]).getTime(),
+                    lo = Math.min(0, ...vs),
+                    hi = Math.max(0, ...vs),
+                    W = 600,
+                    Ht = 150,
+                    pd = 8;
+                const X = (d) => (t1 === t0 ? W / 2 : ((new Date(d).getTime() - t0) / (t1 - t0)) * (W - 2 * pd) + pd),
+                    Y = (v) => (hi === lo ? Ht / 2 : Ht - pd - ((v - lo) / (hi - lo)) * (Ht - 2 * pd));
+                const path = pts
+                    .map((p, i) => (i ? "L" : "M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1))
+                    .join(" ");
+                return (
+                    '<svg viewBox="0 0 ' +
+                    W +
+                    " " +
+                    Ht +
+                    '" class="svg" role="img" aria-label="Kumulierter Saldo"><line class="ln" x1="0" x2="' +
+                    W +
+                    '" y1="' +
+                    Y(0) +
+                    '" y2="' +
+                    Y(0) +
+                    '"/><path class="pl" d="' +
+                    path +
+                    '"/></svg><p class="hint" style="margin:4px 0 0">Verlauf: ' +
+                    fd(pts[0][0]) +
+                    " bis " +
+                    fd(pts[pts.length - 1][0]) +
+                    ", Endstand " +
+                    eur(c) +
+                    "</p>"
+                );
+            }
+            let tedit = false;
+            const tplChips = () =>
+                '<div class="tpls' +
+                (tedit ? " ed" : "") +
+                '">' +
+                S.tpl
+                    .map(
+                        (t) =>
+                            '<button class="tpl" data-a="' +
+                            (tedit ? "edit" : "tpl") +
+                            '" data-m="tpl" data-id="' +
+                            t.id +
+                            '">' +
+                            esc(t.title) +
+                            (t.time ? " <small>" + esc(t.time) + "</small>" : "") +
+                            "</button>"
+                    )
+                    .join("") +
+                '<button data-a="add" data-m="tpl">+ Vorlage</button><button data-a="tedit">' +
+                (tedit ? "Fertig" : "Bearbeiten") +
+                "</button></div>";
+            const SRC = {
+                week: "Kalender",
+                todos: "To-Do",
+                rem: "Erinnerung",
+                vac: "Urlaub",
+                fin: "Finanzen",
+                fix: "Fester Termin",
+            };
+            const memoItems = () => {
+                const r = [];
+                Object.keys(SRC).forEach((m) =>
+                    S[m].forEach((e) => {
+                        if (e.memo) r.push({ m, e });
+                    })
+                );
+                return r.sort((a, b) => (b.e.date || "").localeCompare(a.e.date || ""));
+            };
+            function nrefOptions() {
+                const lim = iso(addDays(new Date(), -14)),
+                    o = [];
+                S.week
+                    .filter((e) => e.date >= lim)
+                    .sort(cmp)
+                    .forEach((e) => o.push(["week:" + e.id, "Kalender · " + e.title + " (" + fd(e.date) + ")"]));
+                S.todos.filter((e) => !e.done).forEach((e) => o.push(["todos:" + e.id, "To-Do · " + e.title]));
+                S.rem
+                    .filter((e) => !e.done)
+                    .forEach((e) => o.push(["rem:" + e.id, "Erinnerung · " + e.title + " (" + fd(e.date) + ")"]));
+                S.vac.forEach((e) => o.push(["vac:" + e.id, "Urlaub · " + e.title + " (" + fd(e.date) + ")"]));
+                return o.length ? o : [["", "Noch keine Einträge vorhanden"]];
+            }
+            const remItems = () => {
+                const r = [];
+                ["week", "todos", "vac", "fin"].forEach((m) =>
+                    S[m].forEach((e) => {
+                        if (e.rdate) r.push({ m, e });
+                    })
+                );
+                return r.sort(
+                    (a, b) =>
+                        !!a.e.rdone - !!b.e.rdone ||
+                        (a.e.rdate + (a.e.rtime || "")).localeCompare(b.e.rdate + (b.e.rtime || ""))
+                );
+            };
+            // Alle Erinnerungen mit Zeitpunkt (abzüglich Vorlaufzeit); ohne Uhrzeit gilt 09:00
+            function dueList() {
+                const out = [],
+                    lead = S.cfg.lead || 0;
+                const add = (m, e, d, t) => {
+                    if (d)
+                        out.push({
+                            key: m + ":" + e.id + ":" + d + ":" + (t || "") + ":" + lead,
+                            at: new Date(d + "T" + (t || "09:00")).getTime() - lead * 60000,
+                            m,
+                            e,
+                            d,
+                            t,
+                        });
+                };
+                S.rem.forEach((e) => {
+                    if (!e.done) add("rem", e, e.date, e.time);
+                });
+                ["week", "todos", "vac", "fin"].forEach((m) =>
+                    S[m].forEach((e) => {
+                        if (e.rdate && !e.rdone && !isDone(e)) add(m, e, e.rdate, e.rtime);
+                    })
+                );
+                return out;
+            }
+            async function notify(title, body, tag) {
+                if (!S.cfg.notif || !("Notification" in window) || Notification.permission !== "granted") return false;
+                try {
+                    const reg = navigator.serviceWorker && (await navigator.serviceWorker.getRegistration());
+                    if (reg) {
+                        await reg.showNotification(title, { body, tag });
+                        return true;
+                    }
+                } catch (e) {}
+                try {
+                    new Notification(title, { body, tag });
+                    return true;
+                } catch (e) {}
+                return false;
+            }
+            async function toggleNotif() {
+                try {
+                    if (S.cfg.notif) S.cfg.notif = false;
+                    else if ("Notification" in window) {
+                        const p =
+                            Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
+                        S.cfg.notif = p === "granted";
+                        if (S.cfg.notif)
+                            await notify("Mitteilungen sind aktiv", "So erscheinen deine Erinnerungen.", "test");
+                    }
+                } catch (e) {
+                    S.cfg.notif = false;
+                }
+                save();
+                render();
+            }
+            function notifStatus() {
+                if (!("Notification" in window))
+                    return "Dieser Browser unterstützt keine Mitteilungen. Fällige Erinnerungen erscheinen als Hinweis oben in der App.";
+                if (Notification.permission === "denied")
+                    return "Mitteilungen sind im Browser blockiert. Erlaube sie in den Website-Einstellungen.";
+                return S.cfg.notif && Notification.permission === "granted"
+                    ? "Aktiv. Mitteilungen kommen, solange diese Seite im Browser geöffnet ist."
+                    : "Aus. Aktiviere Mitteilungen für fällige Erinnerungen.";
+            }
+            async function tick() {
+                const now = Date.now(),
+                    L = dueList(),
+                    keys = new Set(L.map((x) => x.key));
+                const sent = (S.cfg.sent = Object.fromEntries(
+                    Object.entries(S.cfg.sent || {}).filter((x) => keys.has(x[0]))
+                ));
+                let ch = false;
+                for (const x of L) {
+                    if (x.at > now || sent[x.key]) continue;
+                    sent[x.key] = 1;
+                    ch = true;
+                    if (now - x.at < 12 * 36e5) {
+                        const ok = await notify(
+                            "Erinnerung: " + x.e.title,
+                            fd(x.d) + (x.t ? ", " + x.t + " Uhr" : "") + (x.e.memo ? " · " + x.e.memo : ""),
+                            x.key
+                        );
+                        if (!ok && navigator.vibrate) {
+                            try {
+                                navigator.vibrate(200);
+                            } catch (e) {}
+                        }
+                    }
+                }
+                if (ch) {
+                    save();
+                    render();
+                }
+            }
+            // Feste, wiederkehrende Termine (Geburtstage, Zahltage …); das Datum legt Tag, Monat bzw. Wochentag fest
+            const RULES = ["Jährlich", "Monatlich", "Letzter Werktag im Monat", "Wöchentlich"];
+            const KINDS = { Geburtstag: "🎂", Zahltag: "💶", Sonstiges: "📌" };
+            const lastWd = (y, m) => {
+                const d = new Date(y, m + 1, 0);
+                while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() - 1);
+                return d.getDate();
+            };
+            function occurs(f, ds) {
+                const d = new Date(ds + "T00:00"),
+                    b = new Date(f.date + "T00:00");
+                if (isNaN(b) || d < b) return false;
+                const y = d.getFullYear(),
+                    m = d.getMonth(),
+                    dim = new Date(y, m + 1, 0).getDate();
+                if (f.rule === "Jährlich")
+                    return (
+                        m === b.getMonth() &&
+                        (d.getDate() === b.getDate() ||
+                            (b.getMonth() === 1 && b.getDate() === 29 && dim === 28 && d.getDate() === 28))
+                    );
+                if (f.rule === "Monatlich") return d.getDate() === Math.min(b.getDate(), dim);
+                if (f.rule === "Letzter Werktag im Monat") return d.getDate() === lastWd(y, m);
+                if (f.rule === "Wöchentlich") return d.getDay() === b.getDay();
+                return false;
+            }
+            const fixLabel = (f, ds) => {
+                const age =
+                    f.rule === "Jährlich" && f.kind === "Geburtstag"
+                        ? new Date(ds + "T00:00").getFullYear() - new Date(f.date + "T00:00").getFullYear()
+                        : 0;
+                return (KINDS[f.kind] || "📌") + " " + f.title + (age > 0 ? " (" + age + ")" : "");
+            };
+            function nextOcc(f) {
+                const t = new Date();
+                t.setHours(0, 0, 0, 0);
+                for (let i = 0; i < 400; i++) {
+                    const ds = iso(addDays(t, i));
+                    if (occurs(f, ds)) return ds;
+                }
+                return "";
+            }
+            function ruleText(f) {
+                const b = new Date(f.date + "T00:00");
+                if (f.rule === "Jährlich")
+                    return "jährlich am " + b.toLocaleDateString("de-DE", { day: "numeric", month: "long" });
+                if (f.rule === "Monatlich") return "monatlich am " + b.getDate() + ".";
+                if (f.rule === "Wöchentlich")
+                    return "wöchentlich, " + b.toLocaleDateString("de-DE", { weekday: "long" });
+                return "am letzten Werktag des Monats";
+            }
+            function fixList() {
+                const l = S.fix
+                    .map((f) => ({ f, n: nextOcc(f) }))
+                    .sort((a, b) => (a.n || "9").localeCompare(b.n || "9"));
+                return (
+                    '<div class="bar"><h1 style="font-size:1.05rem">Feste Termine</h1>' +
+                    addBtn("fix") +
+                    '</div><div class="list">' +
+                    (l.length
+                        ? l
+                              .map(
+                                  (x) =>
+                                      '<div class="row" data-a="edit" data-m="fix" data-id="' +
+                                      x.f.id +
+                                      '"><div class="t">' +
+                                      esc((KINDS[x.f.kind] || "📌") + " " + x.f.title) +
+                                      "<br><small>" +
+                                      ruleText(x.f) +
+                                      (x.n ? " · nächster Termin: " + fd(x.n) : "") +
+                                      "</small></div></div>"
+                              )
+                              .join("")
+                        : '<div class="empty">Noch keine festen Termine, z. B. Geburtstage oder Zahltag.</div>') +
+                    "</div>"
+                );
+            }
+            function fxHtml() {
+                const r = [];
+                S.fix.forEach((f) => {
+                    for (let i = 0; i < 14; i++) {
+                        const ds = iso(addDays(new Date(), i));
+                        if (occurs(f, ds)) r.push({ f, ds });
+                    }
+                });
+                r.sort((a, b) => a.ds.localeCompare(b.ds));
+                return r.length
+                    ? '<h2 class="sub">Feste Termine (nächste 14 Tage)</h2><div class="list">' +
+                          r
+                              .map(
+                                  (x) =>
+                                      '<div class="row" data-a="edit" data-m="fix" data-id="' +
+                                      x.f.id +
+                                      '"><div class="t">' +
+                                      esc(fixLabel(x.f, x.ds)) +
+                                      "<br><small>" +
+                                      fd(x.ds) +
+                                      "</small></div></div>"
+                              )
+                              .join("") +
+                          "</div>"
+                    : "";
+            }
+            let wp = "todo",
+                ndet = false;
+            const vacList = () => {
+                const vl = S.vac.slice().sort((a, b) => a.date.localeCompare(b.date));
+                return (
+                    '<div class="bar"><h1 style="font-size:1.05rem">Urlaub</h1>' +
+                    addBtn("vac") +
+                    '</div><div class="list">' +
+                    (vl.length
+                        ? vl
+                              .map(
+                                  (v) =>
+                                      '<div class="row" data-a="edit" data-m="vac" data-id="' +
+                                      v.id +
+                                      '"><div class="t">' +
+                                      esc(v.title) +
+                                      "<br><small>" +
+                                      dnice(v.date) +
+                                      (v.to && v.to !== v.date ? " – " + dnice(v.to) : "") +
+                                      (v.memo ? "<br>✎ " + esc(v.memo.slice(0, 80)) : "") +
+                                      "</small></div></div>"
+                              )
+                              .join("")
+                        : '<div class="empty">Kein Urlaub eingetragen.</div>') +
+                    "</div>"
+                );
+            };
+            // Bereich unter dem Kalender: To-Dos, Notizen, Erinnerungen, Urlaub und feste Termine
+            function panel() {
+                const open = S.todos.filter((e) => !e.done).length,
+                    mi = memoItems().length + S.notes.length,
+                    rc = dueList().filter((x) => x.at <= Date.now()).length;
+                const seg = [
+                    ["todo", "To-Dos" + (open ? " (" + open + ")" : "")],
+                    ["notes", "Notizen" + (mi ? " (" + mi + ")" : "")],
+                    ["rem", "Erinnerungen" + (rc ? " (" + rc + ")" : "")],
+                    ["more", "Urlaub & Feste"],
+                ]
+                    .map(
+                        (p) =>
+                            '<button data-a="wp" data-k="' +
+                            p[0] +
+                            '"' +
+                            (wp === p[0] ? ' class="on"' : "") +
+                            ">" +
+                            p[1] +
+                            "</button>"
+                    )
+                    .join("");
+                return (
+                    '<div class="seg segw" id="wpanel">' +
+                    seg +
+                    '</div><div class="panel' +
+                    (wp === "more" ? "" : " hh") +
+                    '">' +
+                    (wp === "more" ? vacList() + fixList() : V[wp === "todo" ? "todos" : wp]()) +
+                    "</div>"
+                );
+            }
+            const V = {
+                week() {
+                    const m = addDays(monday(new Date()), wk * 7),
+                        today = iso(new Date());
+                    let total = 0,
+                        heads = "<div></div>",
+                        cols = "",
+                        axis = '<div class="ax">';
+                    for (let h = T0; h < T1; h++)
+                        axis += '<span style="top:' + (h - T0) * H + 'px">' + h + ":00</span>";
+                    axis += "</div>";
+                    for (let i = 0; i < 7; i++) {
+                        const d = addDays(m, i),
+                            ds = iso(d),
+                            hn = getHol(d.getFullYear())[ds],
+                            w = WORK[d.getDay()];
+                        const vac = S.vac.find((v) => v.date <= ds && ds <= (v.to || v.date));
+                        const off = hn ? "hol" : vac ? "vac" : "";
+                        if (w && !off)
+                            total += mins(w[1]) - mins(w[0]) - w[2].reduce((s, b) => s + mins(b[1]) - mins(b[0]), 0);
+                        const items = S.week.filter((e) => e.date === ds).sort(cmp);
+                        const cls = (ds === today ? " today" : "") + (off ? " " + off : "");
+                        heads +=
+                            '<div class="ch' +
+                            cls +
+                            '"><div class="chh"><b>' +
+                            d.toLocaleDateString("de-DE", { weekday: "short" }) +
+                            " " +
+                            d.getDate() +
+                            '.</b><button data-a="add" data-m="week" data-d="' +
+                            ds +
+                            '" aria-label="Eintrag hinzufügen">+</button></div><small>' +
+                            esc(hn || (vac ? vac.title : w ? w[0] + "–" + w[1] : "frei")) +
+                            "</small>" +
+                            S.fix
+                                .filter((f) => occurs(f, ds))
+                                .map(
+                                    (f) =>
+                                        '<div class="chip fx" data-a="edit" data-m="fix" data-id="' +
+                                        f.id +
+                                        '">' +
+                                        esc(fixLabel(f, ds)) +
+                                        "</div>"
+                                )
+                                .join("") +
+                            items
+                                .filter((e) => !e.time)
+                                .map(
+                                    (e) =>
+                                        '<div class="chip' +
+                                        (isDone(e) ? " done" : "") +
+                                        '" data-a="edit" data-m="week" data-id="' +
+                                        e.id +
+                                        '">' +
+                                        esc(e.title) +
+                                        (e.memo ? " ✎" : "") +
+                                        "</div>"
+                                )
+                                .join("") +
+                            "</div>";
+                        cols +=
+                            '<div class="cc' +
+                            cls +
+                            '" data-d="' +
+                            ds +
+                            '">' +
+                            (w && !off
+                                ? '<div class="shift" title="Arbeitszeit" style="top:' +
+                                  tp(w[0]) +
+                                  "px;height:" +
+                                  (tp(w[1]) - tp(w[0])) +
+                                  'px">' +
+                                  w[2]
+                                      .map(
+                                          (b) =>
+                                              '<div class="brk" title="Pause ' +
+                                              b[0] +
+                                              "–" +
+                                              b[1] +
+                                              '" style="top:' +
+                                              (tp(b[0]) - tp(w[0])) +
+                                              "px;height:" +
+                                              (tp(b[1]) - tp(b[0])) +
+                                              'px"></div>'
+                                      )
+                                      .join("") +
+                                  "</div>"
+                                : "") +
+                            items
+                                .filter((e) => e.time)
+                                .map((e) => {
+                                    const t = Math.max(0, tp(e.time)),
+                                        hg = Math.max(24, e.end && e.end > e.time ? tp(e.end) - tp(e.time) : H * 0.9);
+                                    return (
+                                        '<div class="ev ' +
+                                        (e.type === "Aufgabe" ? "tk" : "tm") +
+                                        (isDone(e) ? " done" : "") +
+                                        '" data-a="edit" data-m="week" data-id="' +
+                                        e.id +
+                                        '" style="top:' +
+                                        t +
+                                        "px;height:" +
+                                        hg +
+                                        'px"' +
+                                        (e.memo ? ' title="' + esc(e.memo) + '"' : "") +
+                                        "><b>" +
+                                        esc(e.time) +
+                                        "</b> " +
+                                        esc(e.title) +
+                                        (e.memo ? " ✎" : "") +
+                                        "</div>"
+                                    );
+                                })
+                                .join("") +
+                            "</div>";
+                    }
+                    const vl = S.vac.slice().sort((a, b) => a.date.localeCompare(b.date));
+                    return (
+                        '<div class="bar"><h1>' +
+                        m.toLocaleDateString("de-DE", { day: "numeric", month: "short" }) +
+                        " – " +
+                        addDays(m, 6).toLocaleDateString("de-DE", { day: "numeric", month: "short", year: "numeric" }) +
+                        "</h1>" +
+                        nav3("wk") +
+                        "</div>" +
+                        tplChips() +
+                        '<form class="qa" id="qa"><input type="date" name="date" value="' +
+                        today +
+                        '" required aria-label="Datum"><input type="time" name="time" aria-label="Uhrzeit (optional)"><input name="title" placeholder="Neuer Eintrag, z. B. Zahnarzt" required aria-label="Eintrag"><button class="p">Eintragen</button></form>' +
+                        '<div class="wrap"><div class="cal">' +
+                        heads +
+                        axis +
+                        cols +
+                        "</div></div>" +
+                        '<p class="hint">Soll diese Woche: ' +
+                        hm(total) +
+                        " h (ohne Pausen, Feiertage, Urlaub) · schraffiert = Pause · freie Stelle antippen zum Eintragen</p>" +
+                        panel()
+                    );
+                },
+                fin() {
+                    if (fsrc && !(S.imports || []).some((m) => m.id === fsrc)) fsrc = "";
+                    const F = fsrc ? S.fin.filter((e) => (e.imps || []).includes(fsrc)) : S.fin;
+                    const imps = (S.imports || []).slice().reverse();
+                    const srcSel = imps.length
+                        ? '<div class="fs"><label>Umsatzquelle<select id="fsrc"><option value="">Alle Umsätze (' +
+                          S.fin.length +
+                          ")</option>" +
+                          imps
+                              .map(
+                                  (m, i) =>
+                                      '<option value="' +
+                                      m.id +
+                                      '"' +
+                                      (fsrc === m.id ? " selected" : "") +
+                                      ">" +
+                                      (i === 0 ? "Letzter Import · " : "") +
+                                      esc(m.name) +
+                                      " · " +
+                                      fd(m.at.slice(0, 10)) +
+                                      " (" +
+                                      m.n +
+                                      ")</option>"
+                              )
+                              .join("") +
+                          "</select></label>" +
+                          (fsrc
+                              ? '<button class="d" data-a="delimp">' +
+                                (delArm ? "Wirklich entfernen?" : "Import entfernen") +
+                                "</button>"
+                              : "") +
+                          "</div>"
+                        : "";
+                    const now = new Date();
+                    let key = "",
+                        label = "Gesamter Zeitraum",
+                        base = null;
+                    if (fper === "m") {
+                        base = new Date(now.getFullYear(), now.getMonth() + mo, 1);
+                        key = iso(base).slice(0, 7);
+                        label = base.toLocaleDateString("de-DE", { month: "long", year: "numeric" });
+                    } else if (fper === "y") {
+                        key = String(now.getFullYear() + mo);
+                        label = key;
+                    }
+                    const items = F.filter((e) => (e.date || "").startsWith(key)).sort((a, b) =>
+                        b.date.localeCompare(a.date)
+                    );
+                    const out = items.filter((e) => e.kind !== "Einnahme"),
+                        inc = items.filter((e) => e.kind === "Einnahme");
+                    const si = inc.reduce((s, e) => s + e.amount, 0),
+                        so = out.reduce((s, e) => s + e.amount, 0),
+                        net = si - so;
+                    let days = 1;
+                    if (fper === "m")
+                        days =
+                            key === iso(now).slice(0, 7)
+                                ? now.getDate()
+                                : new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate();
+                    else if (items.length)
+                        days =
+                            Math.round((new Date(items[0].date) - new Date(items[items.length - 1].date)) / 864e5) + 1;
+                    const big = out.slice().sort((a, b) => b.amount - a.amount)[0];
+                    let a, z;
+                    if (fper === "m") {
+                        a = iso(new Date(base.getFullYear(), base.getMonth() - 5, 1)).slice(0, 7);
+                        z = key;
+                    } else if (fper === "y") {
+                        a = key + "-01";
+                        z = key + "-12";
+                    } else {
+                        const ds = F.map((e) => e.date)
+                            .filter(Boolean)
+                            .sort();
+                        a = ds.length ? ds[0].slice(0, 7) : iso(now).slice(0, 7);
+                        z = ds.length ? ds[ds.length - 1].slice(0, 7) : a;
+                    }
+                    const ms = monthKeys(a, z)
+                        .slice(-24)
+                        .map((k) => {
+                            const r = F.filter((e) => (e.date || "").startsWith(k));
+                            return {
+                                k,
+                                inc: r.filter((e) => e.kind === "Einnahme").reduce((s, e) => s + e.amount, 0),
+                                out: r.filter((e) => e.kind !== "Einnahme").reduce((s, e) => s + e.amount, 0),
+                            };
+                        });
+                    const cm = {},
+                        pm = {};
+                    out.forEach((e) => {
+                        const k = e.cat || "Sonstiges";
+                        cm[k] = (cm[k] || 0) + e.amount;
+                        pm[e.title] = (pm[e.title] || 0) + e.amount;
+                    });
+                    const cs = Object.entries(cm).sort((x, y) => y[1] - x[1]),
+                        tp5 = Object.entries(pm)
+                            .sort((x, y) => y[1] - x[1])
+                            .slice(0, 6);
+                    const filt = fcat ? items.filter((e) => (e.cat || "Sonstiges") === fcat) : items;
+                    const rows = filt
+                        .slice(0, flim)
+                        .map(
+                            (e) =>
+                                '<div class="row" data-a="edit" data-m="fin" data-id="' +
+                                e.id +
+                                '"><div class="t">' +
+                                esc(e.title) +
+                                "<br><small>" +
+                                fd(e.date) +
+                                " · " +
+                                esc(e.cat || "Sonstiges") +
+                                (e.note ? " · " + esc(e.note.slice(0, 70)) : "") +
+                                (e.memo ? " · ✎ " + esc(e.memo.slice(0, 50)) : "") +
+                                '</small></div><b class="' +
+                                (e.kind === "Einnahme" ? 'in">+' : 'out">−') +
+                                eur(e.amount) +
+                                "</b></div>"
+                        )
+                        .join("");
+                    const seg = [
+                        ["m", "Monat"],
+                        ["y", "Jahr"],
+                        ["all", "Gesamt"],
+                    ]
+                        .map(
+                            (p) =>
+                                '<button data-a="per" data-k="' +
+                                p[0] +
+                                '"' +
+                                (fper === p[0] ? ' class="on"' : "") +
+                                ">" +
+                                p[1] +
+                                "</button>"
+                        )
+                        .join("");
+                    const charts = items.length
+                        ? '<div class="cg"><div class="cd"><h3>Einnahmen und Ausgaben pro Monat</h3>' +
+                          bars(ms) +
+                          '<p class="hint" style="margin:4px 0 0"><span class="in">■</span> Einnahmen &nbsp; <span class="out">■</span> Ausgaben</p></div>' +
+                          '<div class="cd"><h3>Ausgaben nach Kategorie</h3>' +
+                          (so ? donut(cs, so) : '<div class="empty">Keine Ausgaben.</div>') +
+                          '<p class="hint" style="margin:4px 0 0">Tippe auf eine Kategorie, um die Liste zu filtern.</p></div>' +
+                          '<div class="cd"><h3>Saldo-Verlauf</h3>' +
+                          line(items) +
+                          "</div>" +
+                          '<div class="cd"><h3>Größte Ausgaben nach Empfänger</h3>' +
+                          (tp5.length
+                              ? tp5
+                                    .map(
+                                        (p) =>
+                                            '<div class="hb"><span>' +
+                                            esc(p[0]) +
+                                            "</span><b>" +
+                                            eur(p[1]) +
+                                            '</b><u><i style="width:' +
+                                            Math.round((p[1] / tp5[0][1]) * 100) +
+                                            '%"></i></u></div>'
+                                    )
+                                    .join("")
+                              : '<div class="empty">Keine Ausgaben.</div>') +
+                          "</div></div>"
+                        : "";
+                    return (
+                        '<div class="bar"><h1>' +
+                        label +
+                        "</h1>" +
+                        (fper !== "all" ? nav3("mo") : "") +
+                        '</div><div class="seg">' +
+                        seg +
+                        "</div>" +
+                        srcSel +
+                        '<div class="sum"><div>Einnahmen<b class="in">' +
+                        eur(si) +
+                        '</b></div><div>Ausgaben<b class="out">' +
+                        eur(so) +
+                        '</b></div><div>Saldo<b class="' +
+                        (net >= 0 ? "in" : "out") +
+                        '">' +
+                        eur(net) +
+                        "</b></div>" +
+                        "<div>Sparquote<b>" +
+                        (si ? Math.round((net / si) * 100) + " %" : "–") +
+                        "</b></div><div>Ø Ausgaben pro Tag<b>" +
+                        eur(so / days) +
+                        "</b></div><div>Buchungen<b>" +
+                        items.length +
+                        "</b></div>" +
+                        (big
+                            ? '<div>Größte Ausgabe<b class="out">' +
+                              eur(big.amount) +
+                              "</b><small>" +
+                              esc(big.title.slice(0, 28)) +
+                              "</small></div>"
+                            : "") +
+                        "</div>" +
+                        charts +
+                        '<div class="bar"><h1 style="font-size:1.05rem">Umsätze' +
+                        (fcat ? ": " + esc(fcat) : "") +
+                        "</h1>" +
+                        (fcat ? '<button data-a="fcat" data-k="' + esc(fcat) + '">Filter aufheben</button>' : "") +
+                        '<button data-a="csv">CSV importieren</button>' +
+                        addBtn("fin") +
+                        "</div>" +
+                        (fmsg ? '<p class="hint" role="status">' + esc(fmsg) + "</p>" : "") +
+                        '<div class="list">' +
+                        (rows ||
+                            '<div class="empty">Keine Umsätze in diesem Zeitraum. Importiere eine CSV-CAMT-Datei oder lege einen Eintrag an.</div>') +
+                        "</div>" +
+                        (filt.length > flim
+                            ? '<p><button data-a="more">Weitere ' +
+                              Math.min(100, filt.length - flim) +
+                              " anzeigen</button></p>"
+                            : "")
+                    );
+                },
+                todos() {
+                    const today = iso(new Date()),
+                        now = today + new Date().toTimeString().slice(0, 5),
+                        up = [];
+                    S.week.forEach((e) => {
+                        if (!isDone(e) && (e.date >= today || e.type === "Aufgabe"))
+                            up.push({
+                                m: "week",
+                                e,
+                                date: e.date,
+                                time: e.time || "",
+                                lbl: "Kalender · " + (e.type || "Termin"),
+                            });
+                    });
+                    S.rem.forEach((e) => {
+                        if (!e.done) up.push({ m: "rem", e, date: e.date, time: e.time || "", lbl: "Erinnerung" });
+                    });
+                    up.sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+                    S.todos.forEach((e) => {
+                        if (!e.done) up.push({ m: "todos", e, date: "", time: "", lbl: "To-Do" });
+                    });
+                    const done = S.todos.filter((e) => e.done);
+                    const row = (u) => {
+                        const late =
+                            u.date && u.date + (u.time || "23:59") < now && !(u.m === "week" && u.e.type !== "Aufgabe");
+                        return (
+                            '<div class="row' +
+                            (late ? " late" : "") +
+                            '" data-a="edit" data-m="' +
+                            u.m +
+                            '" data-id="' +
+                            u.e.id +
+                            '"><input class="chk" type="checkbox" data-a="tog" data-m="' +
+                            u.m +
+                            '" data-id="' +
+                            u.e.id +
+                            '" aria-label="Erledigt"><div class="t">' +
+                            esc(u.e.title) +
+                            "<br><small>" +
+                            (u.date ? fd(u.date) + (u.time ? ", " + esc(u.time) : "") + " · " : "") +
+                            u.lbl +
+                            (late ? " · überfällig" : "") +
+                            (u.e.memo ? "<br>✎ " + esc(u.e.memo.slice(0, 80)) : "") +
+                            "</small></div></div>"
+                        );
+                    };
+                    return (
+                        '<div class="bar"><h1>To-Dos</h1>' +
+                        (done.length ? '<button data-a="clr" data-m="todos">Erledigte entfernen</button>' : "") +
+                        addBtn("todos") +
+                        "</div>" +
+                        '<h2 class="sub">Anstehend (' +
+                        up.length +
+                        ')</h2><div class="list">' +
+                        (up.length ? up.map(row).join("") : '<div class="empty">Nichts offen.</div>') +
+                        "</div>" +
+                        fxHtml() +
+                        (done.length
+                            ? '<h2 class="sub">Erledigte To-Dos</h2><div class="list">' +
+                              done
+                                  .map(
+                                      (e) =>
+                                          '<div class="row done" data-a="edit" data-m="todos" data-id="' +
+                                          e.id +
+                                          '"><input class="chk" type="checkbox" data-a="tog" data-m="todos" data-id="' +
+                                          e.id +
+                                          '" checked aria-label="Erledigt"><div class="t">' +
+                                          esc(e.title) +
+                                          "</div></div>"
+                                  )
+                                  .join("") +
+                              "</div>"
+                            : "")
+                    );
+                },
+                notes() {
+                    const mi = memoItems();
+                    return (
+                        '<div class="bar"><h1>Notizen</h1><button data-a="nref">+ Zu Eintrag</button>' +
+                        addBtn("notes") +
+                        "</div>" +
+                        '<h2 class="sub" style="margin-top:0">Notizen zu Einträgen (' +
+                        mi.length +
+                        ')</h2><p class="hint" style="margin-top:0">Antippen, um Eintrag und Notiz zu bearbeiten.</p>' +
+                        (mi.length
+                            ? mi
+                                  .map(
+                                      (x) =>
+                                          '<div class="note" data-a="edit" data-m="' +
+                                          x.m +
+                                          '" data-id="' +
+                                          x.e.id +
+                                          '"><b>' +
+                                          esc(x.e.title) +
+                                          "</b><small>" +
+                                          SRC[x.m] +
+                                          (x.e.date ? " · " + fd(x.e.date) : "") +
+                                          "</small><p>" +
+                                          esc(x.e.memo) +
+                                          "</p></div>"
+                                  )
+                                  .join("")
+                            : '<div class="empty">Noch keine Notizen an Einträgen. Nutze „+ Zu Eintrag“ oder das Feld „Notiz“ in jedem Eintrag.</div>') +
+                        '<h2 class="sub">Eigene Notizen</h2>' +
+                        (S.notes.length
+                            ? S.notes
+                                  .map(
+                                      (e) =>
+                                          '<div class="note" data-a="edit" data-m="notes" data-id="' +
+                                          e.id +
+                                          '"><b>' +
+                                          esc(e.title) +
+                                          "</b><p>" +
+                                          esc(e.text) +
+                                          "</p></div>"
+                                  )
+                                  .join("")
+                            : '<div class="empty">Noch keine eigenen Notizen.</div>')
+                    );
+                },
+                rem() {
+                    const now = Date.now(),
+                        items = remItems(),
+                        lead = S.cfg.lead || 0;
+                    const own = S.rem.slice().sort((a, b) => !!a.done - !!b.done || cmp(a, b));
+                    const ownRow = (e) => {
+                        const late = !e.done && new Date(e.date + "T" + (e.time || "23:59")).getTime() < now;
+                        return (
+                            '<div class="row' +
+                            (e.done ? " done" : "") +
+                            (late ? " late" : "") +
+                            '" data-a="edit" data-m="rem" data-id="' +
+                            e.id +
+                            '"><input class="chk" type="checkbox" data-a="tog" data-m="rem" data-id="' +
+                            e.id +
+                            '"' +
+                            (e.done ? " checked" : "") +
+                            ' aria-label="Erledigt"><div class="t">' +
+                            esc(e.title) +
+                            "<br><small>" +
+                            fd(e.date) +
+                            (e.time ? ", " + esc(e.time) + " Uhr" : "") +
+                            (late ? " · überfällig" : "") +
+                            (e.memo ? "<br>✎ " + esc(e.memo.slice(0, 80)) : "") +
+                            "</small></div></div>"
+                        );
+                    };
+                    const itRow = (x) => {
+                        const e = x.e,
+                            late = !e.rdone && new Date(e.rdate + "T" + (e.rtime || "23:59")).getTime() < now;
+                        return (
+                            '<div class="row' +
+                            (e.rdone ? " done" : "") +
+                            (late ? " late" : "") +
+                            '" data-a="edit" data-m="' +
+                            x.m +
+                            '" data-id="' +
+                            e.id +
+                            '"><input class="chk" type="checkbox" data-a="rtog" data-m="' +
+                            x.m +
+                            '" data-id="' +
+                            e.id +
+                            '"' +
+                            (e.rdone ? " checked" : "") +
+                            ' aria-label="Erledigt"><div class="t">' +
+                            esc(e.title) +
+                            "<br><small>" +
+                            SRC[x.m] +
+                            " · " +
+                            fd(e.rdate) +
+                            (e.rtime ? ", " + esc(e.rtime) + " Uhr" : "") +
+                            (late ? " · überfällig" : "") +
+                            "</small></div></div>"
+                        );
+                    };
+                    const on = S.cfg.notif && "Notification" in window && Notification.permission === "granted";
+                    return (
+                        '<div class="bar"><h1>Erinnerungen</h1><button data-a="rref">+ Zu Eintrag</button>' +
+                        addBtn("rem") +
+                        "</div>" +
+                        '<details class="cd" id="nd" style="margin-bottom:12px"' +
+                        (ndet ? " open" : "") +
+                        "><summary><b>Mitteilungen</b> · " +
+                        (on ? "aktiv" : "aus") +
+                        '</summary><p class="hint" style="margin:8px 0">' +
+                        notifStatus() +
+                        '</p><div class="acts" style="margin-top:0;align-items:flex-end"><button class="' +
+                        (on ? "" : "p") +
+                        '" data-a="notif">' +
+                        (on ? "Ausschalten" : "Mitteilungen aktivieren") +
+                        '</button><span class="sp"></span><label style="margin:0;flex:1">Vorlaufzeit<select id="lead">' +
+                        [
+                            [0, "Zur Erinnerungszeit"],
+                            [10, "10 Minuten vorher"],
+                            [30, "30 Minuten vorher"],
+                            [60, "1 Stunde vorher"],
+                            [1440, "1 Tag vorher"],
+                        ]
+                            .map(
+                                (o) =>
+                                    '<option value="' +
+                                    o[0] +
+                                    '"' +
+                                    (lead === o[0] ? " selected" : "") +
+                                    ">" +
+                                    o[1] +
+                                    "</option>"
+                            )
+                            .join("") +
+                        "</select></label></div></details>" +
+                        '<h2 class="sub" style="margin-top:0">Erinnerungen zu Einträgen (' +
+                        items.length +
+                        ')</h2><p class="hint" style="margin-top:0">Antippen, um den Eintrag zu bearbeiten.</p>' +
+                        '<div class="list">' +
+                        (items.length
+                            ? items.map(itRow).join("")
+                            : '<div class="empty">Noch keine Erinnerungen an Einträgen. Nutze „+ Zu Eintrag“ oder das Feld „Erinnerung am“ in jedem Eintrag.</div>') +
+                        "</div>" +
+                        '<div class="bar"><h2 class="sub" style="flex:1;margin:18px 0 6px">Eigene Erinnerungen</h2>' +
+                        (S.rem.some((e) => e.done)
+                            ? '<button data-a="clr" data-m="rem">Erledigte entfernen</button>'
+                            : "") +
+                        "</div>" +
+                        '<div class="list">' +
+                        (own.length
+                            ? own.map(ownRow).join("")
+                            : '<div class="empty">Noch keine eigenen Erinnerungen.</div>') +
+                        "</div>"
+                    );
+                },
+                data() {
+                    const on = S.cfg.hol;
+                    return (
+                        '<div class="bar"><h1>Daten</h1></div><h2 class="sub">Feiertage</h2><p class="hint">Bundesweite Feiertage sind immer aktiv. Hake zusätzlich die Feiertage deines Bundeslands an.</p><div class="list">' +
+                        OPT.map(
+                            (o) =>
+                                '<label class="row opt"><input class="chk" type="checkbox" data-a="hol" data-k="' +
+                                o[0] +
+                                '"' +
+                                (on.includes(o[0]) ? " checked" : "") +
+                                '><div class="t">' +
+                                o[1] +
+                                "</div></label>"
+                        ).join("") +
+                        "</div>" +
+                        '<h2 class="sub">Sicherung</h2><p class="hint">Alle Daten liegen nur in diesem Browser auf diesem Gerät. Smartphone und PC werden nicht automatisch abgeglichen: Exportiere eine Sicherung und importiere sie auf dem anderen Gerät.</p><div class="acts"><button class="p" data-a="exp">Sicherung exportieren</button><button data-a="imp">Sicherung importieren</button></div><p class="hint" id="st" role="status"></p>'
+                    );
+                },
+            };
+
+            function render() {
+                document.getElementById("nav").innerHTML = TABS.map(
+                    ([k, l]) =>
+                        '<button data-a="tab" data-k="' +
+                        k +
+                        '"' +
+                        (k === tab ? ' class="on"' : "") +
+                        ">" +
+                        l +
+                        "</button>"
+                ).join("");
+                const today = iso(new Date()),
+                    now = today + new Date().toTimeString().slice(0, 5);
+                const due = dueList().filter((x) => x.at <= Date.now());
+                document.getElementById("main").innerHTML =
+                    (!(tab === "week" && wp === "rem") && due.length
+                        ? '<div class="banner" data-a="wp" data-k="rem"><b>' +
+                          due.length +
+                          " Erinnerung" +
+                          (due.length > 1 ? "en" : "") +
+                          " fällig</b><br>" +
+                          esc(due[0].e.title) +
+                          (due.length > 1 ? " und weitere" : "") +
+                          "</div>"
+                        : "") + V[tab]();
+            }
+
+            document.addEventListener("click", (e) => {
+                const el = e.target.closest("[data-a]");
+                if (!el) {
+                    const c = e.target.closest(".cc");
+                    if (c) {
+                        const r = c.getBoundingClientRect(),
+                            mm = Math.min(
+                                Math.max(Math.round((T0 * 60 + ((e.clientY - r.top) / H) * 60) / 30) * 30, T0 * 60),
+                                T1 * 60 - 30
+                            );
+                        form("week", null, {
+                            date: c.dataset.d,
+                            time: String(Math.floor(mm / 60)).padStart(2, "0") + ":" + String(mm % 60).padStart(2, "0"),
+                        });
+                    }
+                    return;
+                }
+                const a = el.dataset.a,
+                    m = el.dataset.m,
+                    id = el.dataset.id;
+                if (a === "rtog") {
+                    e.stopPropagation();
+                    const it = S[m].find((x) => x.id === id);
+                    it.rdone = el.checked;
+                    save();
+                    render();
+                    return;
+                }
+                if (a === "hol") {
+                    e.stopPropagation();
+                    const k = el.dataset.k;
+                    if (el.checked) {
+                        if (!S.cfg.hol.includes(k)) S.cfg.hol.push(k);
+                    } else S.cfg.hol = S.cfg.hol.filter((x) => x !== k);
+                    save();
+                    return;
+                }
+                if (a === "tog") {
+                    e.stopPropagation();
+                    const it = S[m].find((x) => x.id === id);
+                    it.done = el.checked;
+                    if (m === "week") it.state = el.checked ? "Erledigt" : "Offen";
+                    save();
+                    render();
+                    return;
+                }
+                if (a === "tab") {
+                    tab = el.dataset.k;
+                    render();
+                    window.scrollTo(0, 0);
+                } else if (a === "nav") {
+                    const n = +el.dataset.n;
+                    if (el.dataset.k === "wk") wk = n ? wk + n : 0;
+                    else mo = n ? mo + n : 0;
+                    render();
+                } else if (a === "add")
+                    form(m, null, m === "vac" ? { title: "Urlaub" } : el.dataset.d ? { date: el.dataset.d } : {});
+                else if (a === "edit") form(m, id);
+                else if (a === "clr") {
+                    S[m] = S[m].filter((x) => !x.done);
+                    save();
+                    render();
+                } else if (a === "exp") {
+                    const txt = JSON.stringify(S, null, 2),
+                        fn = "mein-alltag-" + iso(new Date()) + ".json";
+                    const st = document.getElementById("st");
+                    (async () => {
+                        let dl = null;
+                        try {
+                            dl = window.claude && (await window.claude.use("downloads"));
+                        } catch (err) {}
+                        if (dl) {
+                            try {
+                                await dl.save({ filename: fn, data: txt });
+                                if (st) st.textContent = "Sicherung gespeichert.";
+                            } catch (err) {
+                                if (st) st.textContent = "Speichern abgebrochen.";
+                            }
+                            return;
+                        }
+                        const l = document.createElement("a");
+                        l.href = URL.createObjectURL(new Blob([txt], { type: "application/json" }));
+                        l.download = fn;
+                        l.click();
+                    })();
+                } else if (a === "imp") document.getElementById("imp").click();
+                else if (a === "csv") document.getElementById("csv").click();
+                else if (a === "tpl") {
+                    const t = S.tpl.find((x) => x.id === id);
+                    if (t)
+                        form("week", null, {
+                            title: t.title,
+                            type: t.type || "Termin",
+                            time: t.time || "",
+                            end: t.end || "",
+                        });
+                } else if (a === "tedit") {
+                    tedit = !tedit;
+                    render();
+                } else if (a === "nref") {
+                    D.nref = {
+                        f: [
+                            ["ref", "Eintrag", "select", nrefOptions()],
+                            ["memo", "Notiz", "textarea"],
+                        ],
+                    };
+                    form("nref");
+                } else if (a === "rref") {
+                    const o = nrefOptions().filter((x) => !x[0].startsWith("rem:"));
+                    D.rref = {
+                        f: [
+                            ["ref", "Eintrag", "select", o.length ? o : [["", "Noch keine Einträge vorhanden"]]],
+                            ["rdate", "Erinnerung am", "date"],
+                            ["rtime", "Uhrzeit (optional)", "time"],
+                        ],
+                    };
+                    form("rref", null, { rdate: iso(new Date()) });
+                } else if (a === "notif") toggleNotif();
+                else if (a === "delimp") {
+                    if (!delArm) {
+                        delArm = true;
+                        render();
+                        return;
+                    }
+                    S.fin = S.fin.filter((e) => !(e.imps && e.imps.length && e.imps.every((x) => x === fsrc)));
+                    S.fin.forEach((e) => {
+                        if (e.imps) e.imps = e.imps.filter((x) => x !== fsrc);
+                    });
+                    S.imports = (S.imports || []).filter((x) => x.id !== fsrc);
+                    fsrc = "";
+                    delArm = false;
+                    save();
+                    render();
+                } else if (a === "wp") {
+                    const was = tab;
+                    tab = "week";
+                    wp = el.dataset.k;
+                    render();
+                    if (was !== "week") {
+                        const pe = document.getElementById("wpanel");
+                        if (pe && pe.scrollIntoView) pe.scrollIntoView();
+                    }
+                } else if (a === "per") {
+                    fper = el.dataset.k;
+                    mo = 0;
+                    fcat = "";
+                    flim = 60;
+                    render();
+                } else if (a === "fcat") {
+                    fcat = fcat === el.dataset.k ? "" : el.dataset.k;
+                    flim = 60;
+                    render();
+                } else if (a === "more") {
+                    flim += 100;
+                    render();
+                }
+            });
+            document.addEventListener("submit", (e) => {
+                if (e.target.id !== "qa") return;
+                e.preventDefault();
+                const fd = Object.fromEntries(new FormData(e.target));
+                S.week.push({
+                    id: uid(),
+                    done: false,
+                    state: "Offen",
+                    type: fd.time ? "Termin" : "Aufgabe",
+                    date: fd.date,
+                    time: fd.time || "",
+                    title: fd.title.trim(),
+                });
+                wk = Math.round((monday(new Date(fd.date + "T00:00")) - monday(new Date())) / 6048e5);
+                save();
+                render();
+            });
+            document.getElementById("csv").onchange = async (ev) => {
+                const f = ev.target.files[0];
+                if (!f) return;
+                const buf = await f.arrayBuffer();
+                let txt;
+                try {
+                    txt = new TextDecoder("utf-8", { fatal: true }).decode(buf);
+                } catch (err) {
+                    txt = new TextDecoder("windows-1252").decode(buf);
+                }
+                fmsg = importCamt(txt, f.name);
+                ev.target.value = "";
+                render();
+            };
+            document.getElementById("imp").onchange = (ev) => {
+                const f = ev.target.files[0];
+                if (!f) return;
+                const r = new FileReader();
+                r.onload = () => {
+                    let msg;
+                    try {
+                        const d = JSON.parse(r.result);
+                        S = Object.assign(
+                            {
+                                week: [],
+                                fin: [],
+                                todos: [],
+                                notes: [],
+                                rem: [],
+                                vac: [],
+                                fix: [],
+                                imports: [],
+                                cfg: { hol: [] },
+                            },
+                            d
+                        );
+                        save();
+                        norm();
+                        msg = "Sicherung importiert.";
+                    } catch (err) {
+                        msg = "Die Datei konnte nicht gelesen werden.";
+                    }
+                    render();
+                    const st = document.getElementById("st");
+                    if (st) st.textContent = msg;
+                };
+                r.readAsText(f);
+                ev.target.value = "";
+            };
+            document.addEventListener(
+                "toggle",
+                (e) => {
+                    if (e.target.id === "nd") ndet = e.target.open;
+                },
+                true
+            );
+            document.addEventListener("change", (e) => {
+                if (e.target.id === "fsrc") {
+                    fsrc = e.target.value;
+                    fcat = "";
+                    flim = 60;
+                    delArm = false;
+                    render();
+                    return;
+                }
+                if (e.target.id === "lead") {
+                    S.cfg.lead = +e.target.value;
+                    save();
+                    render();
+                }
+            });
+            render();
+            tick();
+            setInterval(tick, 30000);
+        </script>
+    </body>
+</html>
